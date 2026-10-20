@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Каталог Нобелівських лауреатів: пошук, фільтрація за категорією та статтю, сортування і перегляд детальної інформації про лауреатів і премії."
+    />
+    <meta name="theme-color" content="#11284c" />
+    <title>Нобелівські лауреати — каталог</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Перейти до основного вмісту</a>
+
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <a class="brand" href="index.html" aria-label="Нобелівські лауреати — на головну сторінку">
+          <span class="brand__mark" aria-hidden="true">N</span>
+          <span class="brand__text">Nobel Catalog</span>
+        </a>
+        <nav class="site-nav" aria-label="Основна навігація">
+          <ul>
+            <li><a class="site-nav__link" href="index.html" aria-current="page">Каталог</a></li>
+            <li><a class="site-nav__link" href="index.html#about">Про проєкт</a></li>
+          </ul>
+        </nav>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+          Темна тема
+        </button>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="container">
+          <p class="hero__eyebrow">Nobel Prize API · Каталог</p>
+          <h1 class="hero__title" id="hero-title">Нобелівські лауреати</h1>
+          <p class="hero__subtitle">
+            Пошук і перегляд лауреатів Нобелівської премії — від 1901 року до сьогодні. Дані
+            завантажуються напряму з публічного Nobel Prize API.
+          </p>
+        </div>
+      </section>
+
+      <section class="catalog" aria-labelledby="catalog-title">
+        <div class="container">
+          <div class="catalog__head">
+            <h2 class="catalog__title" id="catalog-title">Лауреати</h2>
+            <p class="result-count" id="result-count" aria-live="polite"></p>
+          </div>
+
+          <form class="filters" id="filters" role="search" aria-label="Пошук і фільтрація лауреатів">
+            <div class="field field--search">
+              <label for="search-input">Пошук за іменем</label>
+              <input
+                type="search"
+                id="search-input"
+                name="search"
+                placeholder="Наприклад, Curie або Einstein"
+                autocomplete="off"
+              />
+            </div>
+            <div class="field">
+              <label for="category-select">Категорія</label>
+              <select id="category-select" name="category">
+                <option value="">Усі категорії</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="gender-select">Стать</label>
+              <select id="gender-select" name="gender">
+                <option value="">Будь-яка</option>
+                <option value="female">Жінка</option>
+                <option value="male">Чоловік</option>
+                <option value="other">Інше</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="sort-select">Сортування</label>
+              <select id="sort-select" name="sort">
+                <option value="desc">Спочатку новіші</option>
+                <option value="asc">Спочатку старіші</option>
+              </select>
+            </div>
+          </form>
+
+          <div class="status-region" id="status" aria-live="polite"></div>
+          <ul class="card-grid" id="laureate-list"></ul>
+          <nav class="pagination" id="pagination" aria-label="Пагінація результатів"></nav>
+        </div>
+      </section>
+
+      <section class="about" id="about" aria-labelledby="about-title">
+        <div class="container">
+          <h2 id="about-title">Про проєкт</h2>
+          <p>
+            Навчальний вебзастосунок, створений у межах курсу з веброзробки. Демонструє роботу з
+            REST API, асинхронним JavaScript, TypeScript, адаптивним дизайном та доступністю.
+          </p>
+          <p>
+            Джерело даних:
+            <a
+              href="https://www.nobelprize.org/about/developer-zone-2/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Nobel Prize API</a
+            >
+            (nobelprize.org).
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>© 2026 Каталог Нобелівських лауреатів · Навчальний проєкт</p>
+        <p>Дані надає Nobel Prize API · nobelprize.org</p>
+      </div>
+    </footer>
+  </body>
+</html>
