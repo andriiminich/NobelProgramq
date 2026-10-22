@@ -33,7 +33,11 @@ async function fetchOnce<T>(url: string, signal?: AbortSignal): Promise<T> {
     });
 
     if (!response.ok) {
-      throw new ApiError(`Сервер повернув помилку (${response.status}).`, response.status);
+      const message =
+        response.status >= 500
+          ? `Сервіс даних (Nobel Prize API) тимчасово недоступний — помилка ${response.status}. Спробуйте ще раз за хвилину.`
+          : `Сервер повернув помилку (${response.status}).`;
+      throw new ApiError(message, response.status);
     }
 
     return (await response.json()) as T;
