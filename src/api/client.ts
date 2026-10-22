@@ -1,4 +1,8 @@
 const DEFAULT_TIMEOUT_MS = 15_000;
+// Кількість повторів після першої невдалої спроби (загалом MAX_RETRIES + 1 спроб).
+// Nobel Prize API буває нестабільним і іноді «зависає», тому повтор допомагає
+// пережити короткі збої без показу помилки користувачу.
+const MAX_RETRIES = 1;
 
 /** Помилка HTTP-запиту зі статусом відповіді (якщо відома). */
 export class ApiError extends Error {
@@ -11,13 +15,12 @@ export class ApiError extends Error {
   }
 }
 
-/**
- * Універсальна обгортка над fetch:
- * - обмежує час очікування відповіді (щоб не було «вічного» завантаження);
- * - підтримує скасування через зовнішній AbortSignal;
- * - перетворює мережеві та HTTP-помилки на типізовану ApiError.
- */
-export async function request<T>(url: string, signal?: AbortSignal): Promise<T> {
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Одна спроба запиту з таймаутом і підтримкою скасування. */
+async function fetchOnce<T>(url: string, signal?: AbortSignal): Promise<T> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
   const onExternalAbort = () => controller.abort();
@@ -49,4 +52,40 @@ export async function request<T>(url: string, signal?: AbortSignal): Promise<T> 
     clearTimeout(timeoutId);
     signal?.removeEventListener('abort', onExternalAbort);
   }
+}
+
+/**
+ * Універсальна обгортка над fetch із повторними спробами:
+ * - обмежує час очікування відповіді (таймаут);
+ * - повторює запит при таймауті / мережевій помилці / HTTP 5xx;
+ * - не повторює HTTP 4xx (клієнтські помилки) і не повторює скасовані запити;
+ * - перетворює помилки на типізовану ApiError.
+ */
+export async function request<T>(url: string, signal?: AbortSignal): Promise<T> {
+  let lastError: Error = new ApiError(
+    'Не вдалося зʼєднатися із сервером. Перевірте підключення до інтернету.',
+  );
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
+    if (signal?.aborted) {
+      throw new DOMException('Запит скасовано', 'AbortError');
+    }
+
+    try {
+      return await fetchOnce<T>(url, signal);
+    } catch (error) {
+      if (signal?.aborted) throw error;
+      // Клієнтська помилка (4xx) — повторювати безглуздо.
+      if (error instanceof ApiError && error.status != null && error.status < 500) {
+        throw error;
+      }
+      lastError = error instanceof Error ? error : new ApiError('Невідома помилка.');
+
+      if (attempt < MAX_RETRIES) {
+        await delay(600 * (attempt + 1));
+      }
+    }
+  }
+
+  throw lastError;
 }
